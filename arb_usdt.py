@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import os
 from bs4 import BeautifulSoup
 
+from trade import bithumb_buy, bithumb_get_balance, bithumb_sell
+
 # .env 파일 로드
 load_dotenv('config.env')
 
@@ -53,8 +55,6 @@ async def main():
         try:
             bithumb_price = get_bithumb_usdt_price()  
             usd_to_krw = get_usd_to_krw_rate()
-            #get_usd_to_krw_rate()
-            #usd_to_krw = 1405
         
             print(bithumb_price)
             print(usd_to_krw)
@@ -64,9 +64,15 @@ async def main():
                 
             # 알림 조건
             if difference <= -1.5:
-                message = (f"🚨 Alert! USDT Price Difference(Bithumb-bybit): {difference:.2f}%\n")
-                
+                message = (f"🚨 Alert! USDT Price Difference(Bithumb-bybit): {difference:.2f}%\n")               
                 await send_telegram_alert(message)
+                #매수
+                bithumb_buy('USDT/KRW',5)
+
+            elif difference > 0:
+                #매도   
+                amount = bithumb_get_balance('USDT')
+                bithumb_sell('USDT/KRW',amount)
 
         except Exception as e:
             print(f"Error: {e}")
