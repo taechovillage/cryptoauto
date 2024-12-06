@@ -2,25 +2,15 @@ import ccxt
 import requests
 import time
 import asyncio
-from telegram import Bot
-from telegram.constants import ParseMode
 from dotenv import load_dotenv
 import os
 from bs4 import BeautifulSoup
 
+from telegram_send_alert import send_telegram_alert
 from trade import bithumb_buy, bithumb_get_balance, bithumb_sell
 
 # .env 파일 로드
 load_dotenv('config.env')
-
-# 텔레그램 봇 설정
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
-bot = Bot(token=TELEGRAM_TOKEN)
-
-# 알림 함수 (비동기)
-async def send_telegram_alert(message):
-    await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode=ParseMode.HTML)
 
 # KRW 환율 가져오기
 def get_usd_to_krw_rate():
@@ -68,16 +58,16 @@ async def main():
                 message = (f"🚨 Alert! USDT Price Difference(Bithumb-bybit): {difference:.2f}%\n")               
                 await send_telegram_alert(message)
                 #매수
-                bithumb_buy('USDT/KRW',3200)
+                #bithumb_buy('USDT/KRW',3200)
 
-            elif difference > -0.1 and  amount > 5:
+            elif difference > -0.3 and  amount > 5:
                 #매도  
                 bithumb_sell('USDT/KRW',amount)
 
         except Exception as e:
             print(f"Error: {e}")
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
